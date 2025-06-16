@@ -78,6 +78,7 @@ const CalendarView = ({ appointments, clients, services, onCreateAppointment, on
           selectedSlot={selectedSlot}
           clients={clients}
           services={services}
+          appointments={appointments} // Pasamos la lista completa de citas
           onCreateAppointment={(appointment) => {
             onCreateAppointment(appointment);
             setSelectedSlot(null);
@@ -92,7 +93,7 @@ const CalendarView = ({ appointments, clients, services, onCreateAppointment, on
           appointment={appointmentToEdit}
           clients={clients}
           services={services}
-          appointments={appointments} // Pasamos la lista completa de citas
+          appointments={appointments}
           onUpdateAppointment={(updatedApp) => {
             onUpdateAppointment(updatedApp);
             setEditingAppointmentId(null);

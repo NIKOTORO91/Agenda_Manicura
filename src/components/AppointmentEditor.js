@@ -76,7 +76,7 @@ const AppointmentEditor = ({
     return true; // No hay solapamiento
   };
 
-  const handleUpdate = () => {
+  const performUpdate = (newStatus = status) => {
     setErrorMessage(''); // Limpiar mensajes de error previos
 
     const newCalculatedEndTime = calculateEndTime(selectedDate, selectedTime, selectedServicesIds);
@@ -100,14 +100,14 @@ const AppointmentEditor = ({
       servicesDetails: updatedServicesDetails,
       totalPrice: calculateTotalPrice(selectedServicesIds),
       endTime: newCalculatedEndTime, // Actualizar hora de fin
-      status: status
+      status: newStatus // Usar el nuevo status
     };
     onUpdateAppointment(updatedAppointment);
   };
 
   const handleMarkAsAttended = () => {
-    setStatus('Atendido');
-    // No llamar a handleUpdate aquí, el usuario debe presionar "Actualizar Cita"
+    setStatus('Atendido'); // Actualizar el estado local
+    performUpdate('Atendido'); // Ejecutar la actualización con el nuevo estado
   };
 
   const handleDelete = () => {
@@ -195,7 +195,7 @@ const AppointmentEditor = ({
             Cancelar
           </button>
           <button
-            onClick={handleUpdate}
+            onClick={() => performUpdate()} // Llamar a performUpdate sin argumentos para usar el estado actual
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Actualizar Cita

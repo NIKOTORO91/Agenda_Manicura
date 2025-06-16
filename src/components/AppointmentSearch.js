@@ -10,7 +10,11 @@ const AppointmentSearch = ({ appointments, clients, services, onSelectAppointmen
 
     if (term.length > 2) { // Buscar solo si el término tiene al menos 3 caracteres
       const filteredAppointments = appointments.filter(app => {
-        // Asegurarse de que app.servicesDetails exista antes de intentar mapear
+        // Solo incluir citas en estado "Agendado"
+        if (app.status !== 'Agendado') {
+          return false;
+        }
+
         const servicesNames = app.servicesDetails ? app.servicesDetails.map(s => s.name.toLowerCase()).join(' ') : '';
 
         return (app.clientName && app.clientName.toLowerCase().includes(term)) || 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ClientSelector from './ClientSelector';
 import ServiceSelector from './ServiceSelector';
 
@@ -7,11 +7,43 @@ const AppointmentWizard = ({
   clients, 
   services, 
   onCreateAppointment, 
-  onCancel 
+  onCancel,
+  appointments // Necesitamos todas las citas para la validación
 }) => {
   const [step, setStep] = useState(1);
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [selectedServicesIds, setSelectedServicesIds] = useState([]);
+  const [clientWarning, setClientWarning] = useState('');
+
+  useEffect(() => {
+    if (selectedClientId && appointments) {
+      const clientPendingAppointments = appointments.filter(app => 
+        app.clientId === selectedClientId && 
+        app.status === 'Agendado'
+      );
+
+      if (clientPendingAppointments.length > 1) {
+        const client = clients.find(c => c.id === selectedClientId);
+        if (client) {
+          setClientWarning(
+            `El cliente ${client.firstName} ${client.lastName} tiene más de 1 Cita Agendada.`
+          );
+        }
+      } else if (clientPendingAppointments.length === 1) {
+        const client = clients.find(c => c.id === selectedClientId);
+        const pendingApp = clientPendingAppointments[0];
+        if (client && pendingApp) {
+          setClientWarning(
+            `El cliente ${client.firstName} ${client.lastName} tiene una cita agendada para el día ${pendingApp.date} y hora ${pendingApp.time}.`
+          );
+        }
+      } else {
+        setClientWarning('');
+      }
+    } else {
+      setClientWarning('');
+    }
+  }, [selectedClientId, appointments, clients]);
 
   const calculateEndTime = () => {
     if (!selectedSlot || selectedServicesIds.length === 0) return '';
@@ -32,7 +64,7 @@ const AppointmentWizard = ({
   const calculateTotalPrice = () => {
     return selectedServicesIds.reduce((total, serviceId) => {
       const service = services.find(s => s.id === serviceId);
-      return total + (service ? service.price : 0);
+      return total + (service ? parseFloat(service.price) : 0);
     }, 0);
   };
 
@@ -46,9 +78,10 @@ const AppointmentWizard = ({
       date: selectedSlot.date,
       time: selectedSlot.time,
       endTime: calculateEndTime(),
-      services: selectedServicesIds, // Guardamos solo los IDs para referencia
-      servicesDetails: selectedServicesDetails, // Guardamos los detalles para mostrar
-      totalPrice: calculateTotalPrice()
+      services: selectedServicesIds,
+      servicesDetails: selectedServicesDetails,
+      totalPrice: calculateTotalPrice(),
+      status: 'Agendado' // Estado inicial
     });
   };
 
@@ -62,6 +95,12 @@ const AppointmentWizard = ({
           Duración estimada: {calculateEndTime() ? `${selectedSlot.time} - ${calculateEndTime()}` : 'Selecciona servicios'}
         </p>
       </div>
+
+      {clientWarning && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span className="block sm:inline"> {clientWarning}</span>
+        </div>
+      )}
 
       {step === 1 && (
         <ClientSelector 
@@ -88,3 +127,4 @@ const AppointmentWizard = ({
 };
 
 export default AppointmentWizard;
+// DONE
